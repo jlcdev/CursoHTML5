@@ -3,9 +3,20 @@
 	margin: 0px;
 	padding: 0px;
 }
-
-
-.transition
+div .message
 {
-	transition:0.5;
+	background-color: blue;
+}
+div .board
+{
+	height: 400px;
+	background-color: yellow;
+}
+div .input
+{
+	background-color: red;
+}
+.textArea
+{
+	background-color: green;
 }

@@ -4,14 +4,11 @@
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
-		<div></div>
+		<div id="board" class="board"></div>
+		<div class="input">
+			<textarea id="inputArea" class="textArea"></textarea>
+		</div>
 		<script type="text/javascript" src="socket.io.min.js"></script>
-		<script type="text/javascript">
-			var server = "http://localhost:4242";
-			var socket = io.connect(server);
-			socket.on('connect', function(){
-				console.log("Conectado");
-			});
-		</script>
+		<script type="text/javascript" src="script.js"></script>
 	</body>
 </html>
