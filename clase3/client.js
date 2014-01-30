@@ -5,7 +5,7 @@ var players = {};
 var canvas_color = "white";
 
 server.on('connect',function (){
-	console.log("Enviando nuevo user");
+	//console.log("Enviando nuevo user");
 	server.emit('newuser', user);
 });
 
@@ -21,12 +21,12 @@ server.on('update',function (data){
 });
 
 server.on('color',function (color){
-	console.log('Ha entrado un color: '+color);
+	//console.log('Ha entrado un color: '+color);
 	if(color === undefined) return;
 	canvas_color = color;
 });
 
 server.on('exit',function (id){
-	console.log("Player with id: "+id+" disconnected!");
+	//console.log("Player with id: "+id+" disconnected!");
 	delete players[id];
 });

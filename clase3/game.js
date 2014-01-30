@@ -21,14 +21,17 @@ window.addEventListener('keydown',function (e){
 },false);
 window.addEventListener('keyup',function (e){
 	keys[e.keyCode] = false;
+	control = false;
 },false);
 
+var control = false;
 
 function Player(id,name)
 {
 	this.id = id;
 	this.name = name;
 	this.score = 0;
+	//this.color = '#000000'; // override by server
 }
 Player.prototype =
 {
@@ -38,25 +41,32 @@ Player.prototype =
 		if(data.id !== undefined) this.id = data.id;
 		if(data.name !== undefined) this.name = data.name;
 		if(data.score !== undefined) this.score = data.score;
+		//if(data.color !== undefined) this.color = data.color;
 	},
 	logic: function (dt)
 	{
-		if(keys[32])
+		if(keys[32] && !control)
 		{
 			server.emit('hachazo',this);
+			control = !control;
 		}
 	}
 }
 
 function printer(ctx)
 {
-	var y = 20;
+	//Create box for player zone.
+	var y = 40;
+	var tam = Object.keys(players).length;
+	var size = 20+(tam*25);
+	ctx.fillStyle = "#FBF8EF";
+	ctx.fillRect(10,15,150,size);
+	ctx.fillStyle = "black";
+	ctx.font = "bold 16px Arial";
 	for(var p in players)
 	{
 		console.log(players[p]);
 		var text = players[p].name+": "+players[p].score+" points";
-		ctx.fillStyle = "blue";
-		ctx.font = "bold 16px Arial";
 		ctx.fillText(text,15,y);
 		y += 25;
 	}
@@ -70,10 +80,14 @@ function setCanvasColor(ctx)
 
 function logic(dt)
 {
-	for(var p in players)
-	{
-		players[p].logic(dt);
-	}
+	for(var p in players) players[p].logic(dt);
+}
+function render(ctx)
+{
+	ctx.clearRect(0,0,canvas.width,canvas.height);
+	setCanvasColor(ctx);
+	logic(dt);
+	printer(ctx);
 }
 //GameLoop
 var oldDate = +new Date();
@@ -84,10 +98,13 @@ function mainLoop()
 	newDate = +new Date();
 	dt = (newDate - oldDate)/10;
 	oldDate = newDate;
-	ctx.clearRect(0,0,canvas.width,canvas.height);
-	//Code iteration
-	setCanvasColor(ctx);
-	logic(dt);
-	printer(ctx);
+	render(ctx);
 }
 mainLoop();
+
+window.onresize = function(e)
+{
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	render(ctx);
+}
