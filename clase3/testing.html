@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Game color</title>
+	</head>
+	<body>
+		<script type="text/javascript">
+		var keys = [];
+window.addEventListener('keydown',function (e){
+	alert(e.keyCode);
+	keys[e.keyCode] = true;
+},false);
+window.addEventListener('keyup',function (e){
+	keys[e.keyCode] = false;
+},false);
+
+
+		</script>
+	</body>
+</html>
