@@ -45,12 +45,36 @@ function objPrototype()
   }
 }
 
+function Camera()
+{
+  this.x = 0;
+  this.y = 0;
+  this.v = 1000;
+  this.active = false;
+}
+Camera.prototype =
+{
+  logic: function(dt)
+  {
+    var desp = this.v*dt;
+    if(keys[40]) this.y += desp; //DOWN arrow
+    if(keys[39]) this.x += desp; //RIGHT arrow
+    if(keys[37]) this.x -= desp; //LEFT arrow
+    if(keys[38]) this.y -= desp; //UP arrow
+  },
+  changeStatus: function()
+  {
+    this.active = !this.active;
+  }
+};
+
 //Game entities
 var gameObjects = {};
 //Keyboard control
 var keys = [];
 //Mouse coords
 var mouse_x,mouse_y;
+var camera = new Camera();
 
 //Bind events
 //Keyboard events
@@ -72,12 +96,6 @@ window.addEventListener('mousemove',function (e){
 },false);
 
 //Mainloop support 
-function canvasUpdate()
-{
-  ctx.clearRect(0,0,canvas.width,canvas.height); //clean front canvas
-  ctx.drawImage(buffer,0,0); //copy buffer into front canvas
-}
-
 function resizeControl()
 {
   canvas.width = window.innerWidth;
@@ -85,11 +103,11 @@ function resizeControl()
   buffer.width = window.innerWidth;
   buffer.height = window.innerHeight;
   render(ctxBuffer);
-  canvasUpdate();
 }
 
 function logic(dt)
 {
+  if(camera.active){ camera.logic(dt);}
   for(var key in gameObjects)
   {
     if(gameObjects[key].logic) gameObjects[key].logic(dt);
@@ -98,10 +116,14 @@ function logic(dt)
 
 function render(ctx)
 {
+  ctxBuffer.clearRect(0,0,buffer.width,buffer.height);
+  ctx.save();
+  ctx.translate(-camera.x,-camera.y);
   for(var key in gameObjects)
   {
     if(gameObjects[key].render) gameObjects[key].render(ctx);
   }
+  ctx.restore();
 }
 
 //main loop & deltatime
@@ -113,10 +135,10 @@ function mainloop()
   newDate = +new Date();
   dt = (newDate - oldDate)/1000;
   oldDate = newDate;
-  ctxBuffer.clearRect(0,0,buffer.width,buffer.height);//clean buffer
   logic(dt);
   render(ctxBuffer); //draw all in buffer
-  canvasUpdate();
+  ctx.clearRect(0,0,canvas.width,canvas.height); //clean front canvas
+  ctx.drawImage(buffer,0,0); //copy buffer into front canvas
 }
 //Launch mainloop
 requestAnimFrame(mainloop);
