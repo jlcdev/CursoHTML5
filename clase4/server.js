@@ -6,17 +6,8 @@ io.set('log level',logLevel);
 
 var map = {};
 
-function Cell()
-{
-}
 
-function move(cellPlayer,cellMap)
-{
-	if(cellMap.playerid !== undefined) return false;
-	cellMap.playerid = cellPlayer.playerid;
-	delete cellPlayer.playerid;
-}
-
+/*
 function generateMap(min_x,min_y,max_x,max_y)
 {
 	var cell;
@@ -52,7 +43,7 @@ function getMapMax()
 	if(max !== undefined) return max;
 	return 0;
 }
-
+*/
 io.sockets.on('connection',function (client){
 
 	console.log('new client connected!');
@@ -61,6 +52,8 @@ io.sockets.on('connection',function (client){
 		//Send actual map to client.
 		client.emit('map',map);
 	});
+
+	client.on('');
 
 	client.on('disconnect',function (){
 		//

@@ -2,6 +2,8 @@
 var canvas = document.getElementById('canvas');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+var midCanvasWidth = canvas.width/2;
+var midCanvasHeight = canvas.height/2;
 var ctx = canvas.getContext('2d');
 
 //Back canvas
@@ -11,7 +13,7 @@ buffer.height = canvas.height;
 var ctxBuffer = buffer.getContext('2d');
 
 // shim layer with setTimeout fallback
-window.requestAnimFrame = (function()
+window.requestAnimationFrame = (function()
 {
   return window.requestAnimationFrame ||
          window.webkitRequestAnimationFrame ||
@@ -45,26 +47,58 @@ function objPrototype()
   }
 }
 
+function Pos(x,y)
+{
+  this.x = x;
+  this.y = y;
+}
+Pos.prototype.getIndex = function ()
+{
+  return this.x+'x'+this.y;
+}
+Pos.prototype.toString = function ()
+{
+  return this.getIndex();
+}
+Pos.prototype.clone = function ()
+{
+  return new Pos(this.x,this.y);
+}
+
 function Camera()
 {
-  this.x = 0;
-  this.y = 0;
+  this.pos = new Pos(canvas.width/2,canvas.height/2);
   this.v = 1000;
   this.active = false;
+  this.initialX = Math.floor((this.pos.x - midCanvasWidth)/50);
+  this.initialY = Math.floor((this.pos.y - midCanvasHeight)/50);
+  this.endX = Math.floor((this.pos.x + canvas.width)/50);
+  this.endY = Math.floor((this.pos.y + canvas.height)/50);
 }
 Camera.prototype =
 {
   logic: function(dt)
   {
-    var desp = this.v*dt;
-    if(keys[40]) this.y += desp; //DOWN arrow
-    if(keys[39]) this.x += desp; //RIGHT arrow
-    if(keys[37]) this.x -= desp; //LEFT arrow
-    if(keys[38]) this.y -= desp; //UP arrow
+    if(this.active)
+    {
+      var desp = this.v*dt;
+      if(keys[40]) this.pos.y += desp;//DOWN arrow
+      if(keys[39]) this.pos.x += desp; //RIGHT arrow
+      if(keys[37]) this.pos.x -= desp; //LEFT arrow
+      if(keys[38]) this.pos.y -= desp; //UP arrow*/
+    }
+    this.initialX = Math.floor((camera.pos.x - midCanvasWidth)/50);
+    this.initialY = Math.floor((camera.pos.y - midCanvasHeight)/50);
+    this.endX = Math.floor((camera.pos.x + canvas.width)/50);
+    this.endY = Math.floor((camera.pos.y + canvas.height)/50);
   },
   changeStatus: function()
   {
     this.active = !this.active;
+  },
+  center: function (pos,tam)
+  {
+    this.pos = new Pos(pos.x*tam-midCanvasWidth,pos.y*tam-midCanvasHeight);
   }
 };
 
@@ -107,7 +141,7 @@ function resizeControl()
 
 function logic(dt)
 {
-  if(camera.active){ camera.logic(dt);}
+  camera.logic(dt);
   for(var key in gameObjects)
   {
     if(gameObjects[key].logic) gameObjects[key].logic(dt);
@@ -118,7 +152,7 @@ function render(ctx)
 {
   ctxBuffer.clearRect(0,0,buffer.width,buffer.height);
   ctx.save();
-  ctx.translate(-camera.x,-camera.y);
+  if(camera.active) ctx.translate(-camera.pos.x,-camera.pos.y);
   for(var key in gameObjects)
   {
     if(gameObjects[key].render) gameObjects[key].render(ctx);
@@ -131,7 +165,7 @@ var oldDate = +new Date();
 var newDate,dt;
 function mainloop()
 {
-  requestAnimFrame(mainloop);
+  requestAnimationFrame(mainloop);
   newDate = +new Date();
   dt = (newDate - oldDate)/1000;
   oldDate = newDate;
@@ -141,4 +175,4 @@ function mainloop()
   ctx.drawImage(buffer,0,0); //copy buffer into front canvas
 }
 //Launch mainloop
-requestAnimFrame(mainloop);
+requestAnimationFrame(mainloop);
