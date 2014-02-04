@@ -1,8 +1,50 @@
 var map = new Map();
-gameObjects[map._id] = map; //Add map to engine
-
 var key_blocked = false;
-var key_cooldown = 200;
+var key_cooldown = 500;
+
+function Camera()
+{
+	this._id = objPrototype()._id;
+  this.pos = new Pos(canvas.width/2,canvas.height/2);
+  this.v = 1000;
+  this.active = false;
+  this.initialX = Math.floor((this.pos.x - midCanvasWidth)/50);
+  this.initialY = Math.floor((this.pos.y - midCanvasHeight)/50);
+  this.endX = Math.floor((this.pos.x + canvas.width)/50);
+  this.endY = Math.floor((this.pos.y + canvas.height)/50);
+}
+Camera.prototype =
+{
+  logic: function(dt)
+  {
+    if(this.active)
+    {
+      var desp = this.v*dt;
+      if(keys[40]) this.pos.y += desp;//DOWN arrow
+      if(keys[39]) this.pos.x += desp; //RIGHT arrow
+      if(keys[37]) this.pos.x -= desp; //LEFT arrow
+      if(keys[38]) this.pos.y -= desp; //UP arrow*/
+    }
+    this.initialX = Math.floor((this.pos.x - midCanvasWidth)/50);
+    this.initialY = Math.floor((this.pos.y - midCanvasHeight)/50);
+    this.endX = Math.floor((this.pos.x + canvas.width)/50);
+    this.endY = Math.floor((this.pos.y + canvas.height)/50);
+  },
+  center: function (pos,tam)
+  {
+    this.pos = new Pos(pos.x*tam-midCanvasWidth,pos.y*tam-midCanvasHeight);
+  },
+  render: function (ctx)
+  {
+  	if(this.active) ctx.translate(-this.pos.x,-this.pos.y);
+  },
+  changeStatus: function()
+  {
+    this.active = !this.active;
+  }
+};
+
+var camera = new Camera(); //Create camera
 
 function Player(x,y)
 {
@@ -13,7 +55,10 @@ function Player(x,y)
 	this.cell = map.getCellAt(this.pos);
 	this.cell.playerId = this.playerId;
 	this.color = 'blue';
-	camera.center(this.vPos,this.cell.edge);
+	this.vision = 250;
+	
+	console.log(camera.center);
+	//camera.center(this.vPos,this.cell.edge);
 }
 Player.prototype =
 {
@@ -107,6 +152,7 @@ Player.prototype =
 		//camera.center(this.vPos,this.cell.edge);
 	}
 }
-
+gameObjects[camera._id] = camera;
+gameObjects[map._id] = map; //Add map to engine
 var player = new Player(0,0);
-gameObjects[player._id] = player;
+gameObjects[player._id] = player; //Add player to engine

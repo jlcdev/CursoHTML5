@@ -43,7 +43,7 @@ function objPrototype()
   {
     return new gameObject({'_id':id});
   }else{
-    return newGameObject();
+    return objPrototype();
   }
 }
 
@@ -65,50 +65,12 @@ Pos.prototype.clone = function ()
   return new Pos(this.x,this.y);
 }
 
-function Camera()
-{
-  this.pos = new Pos(canvas.width/2,canvas.height/2);
-  this.v = 1000;
-  this.active = false;
-  this.initialX = Math.floor((this.pos.x - midCanvasWidth)/50);
-  this.initialY = Math.floor((this.pos.y - midCanvasHeight)/50);
-  this.endX = Math.floor((this.pos.x + canvas.width)/50);
-  this.endY = Math.floor((this.pos.y + canvas.height)/50);
-}
-Camera.prototype =
-{
-  logic: function(dt)
-  {
-    if(this.active)
-    {
-      var desp = this.v*dt;
-      if(keys[40]) this.pos.y += desp;//DOWN arrow
-      if(keys[39]) this.pos.x += desp; //RIGHT arrow
-      if(keys[37]) this.pos.x -= desp; //LEFT arrow
-      if(keys[38]) this.pos.y -= desp; //UP arrow*/
-    }
-    this.initialX = Math.floor((camera.pos.x - midCanvasWidth)/50);
-    this.initialY = Math.floor((camera.pos.y - midCanvasHeight)/50);
-    this.endX = Math.floor((camera.pos.x + canvas.width)/50);
-    this.endY = Math.floor((camera.pos.y + canvas.height)/50);
-  },
-  changeStatus: function()
-  {
-    this.active = !this.active;
-  },
-  center: function (pos,tam)
-  {
-    this.pos = new Pos(pos.x*tam-midCanvasWidth,pos.y*tam-midCanvasHeight);
-  }
-};
-
 //Game entities
 var gameObjects = {};
 //Keyboard control
 var keys = [];
 //Mouse coords
-var mouse_x,mouse_y;
-var camera = new Camera();
+//var mouse_x,mouse_y;
 
 //Bind events
 //Keyboard events
@@ -123,11 +85,22 @@ window.addEventListener('keyup',function (e){
 window.addEventListener('resize',resizeControl);
 
 //Bind mousemove
+/*
 window.addEventListener('mousemove',function (e){
   var rect = canvas.getBoundingClientRect();
   mouse_x = (e.clientX - rect.left);
   mouse_y = (e.clientY - rect.top);
 },false);
+*/
+
+//Other function support
+function distanceBetwenPoints(pos1,pos2)
+{
+  var dx = pos2.x - pos1.x;
+  var dy = pos2.y - pos1.y;
+  return Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2));
+}
+
 
 //Mainloop support 
 function resizeControl()
@@ -141,7 +114,7 @@ function resizeControl()
 
 function logic(dt)
 {
-  camera.logic(dt);
+  //camera.logic(dt);
   for(var key in gameObjects)
   {
     if(gameObjects[key].logic) gameObjects[key].logic(dt);
@@ -150,9 +123,12 @@ function logic(dt)
 
 function render(ctx)
 {
-  ctxBuffer.clearRect(0,0,buffer.width,buffer.height);
+  ctx.clearRect(0,0,buffer.width,buffer.height);
   ctx.save();
-  if(camera.active) ctx.translate(-camera.pos.x,-camera.pos.y);
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  //ctx.rotate((Math.PI / 180) * -45);
+  //if(camera.active) ctx.translate(-camera.pos.x,-camera.pos.y);
   for(var key in gameObjects)
   {
     if(gameObjects[key].render) gameObjects[key].render(ctx);
