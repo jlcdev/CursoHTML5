@@ -18,16 +18,15 @@ Map.prototype.render = function(ctx)
 {
 	ctx.save();
 	ctx.translate(-camera.pos.x,-camera.pos.y);
-	//ctx.globalAlpha = 0.3;
 	for(var i = camera.initialX; i <= camera.endX; ++i)
 	{
 		for(var j = camera.initialY; j <= camera.endY; ++j)
 		{
 			var cell = this.getCellAt(new Pos(i,j));
 			var dist = distanceBetwenPoints(player.pos,new Pos(i,j));
-			if(dist > 8) ctx.globalAlpha = 0;
-			else if(dist > 7 && dist <= 8) ctx.globalAlpha = 0.3;
-			else if(dist > 4 && dist <= 7) ctx.globalAlpha = 0.5;
+			//ctx.globalAlpha = 1 - ((dist-5)/(player.vision-5);
+			if(dist > player.vision) ctx.globalAlpha = 0;
+			else if(dist < 5) ctx.globalAlpha = 1;
 			else ctx.globalAlpha = 1-dist/10;
 			ctx.drawImage(cell.buffer,i*cell.edge,j*cell.edge);
 		}

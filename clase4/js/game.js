@@ -1,12 +1,23 @@
+
+
+
 var map = new Map();
 var key_blocked = false;
 var key_cooldown = 500;
 
+/*ADD SOUND USING HOWLER*//*
+var sound = new Howl({
+	urls: ['http://s1download-universal-soundbank.com/mp3/sounds/829.mp3'],
+	autoplay: true,
+	loop: true,
+	volume: 0.6
+});*/
+
 function Camera()
 {
-	this._id = objPrototype()._id;
+  this._id = objPrototype()._id;
   this.pos = new Pos(canvas.width/2,canvas.height/2);
-  this.v = 1000;
+  this.v = 1500;
   this.active = false;
   this.initialX = Math.floor((this.pos.x - midCanvasWidth)/50);
   this.initialY = Math.floor((this.pos.y - midCanvasHeight)/50);
@@ -51,12 +62,11 @@ function Player(x,y)
 	this._id = objPrototype()._id;
 	this.pos = new Pos(x,y);
 	this.vPos = this.pos.clone();
-	this.playerId = genId();
 	this.cell = map.getCellAt(this.pos);
 	this.cell.playerId = this.playerId;
-	this.color = 'blue';
 	this.vision = 10;
-	this.life = 75;
+	this.color = 'white';
+	this.life = 100;
 }
 Player.prototype =
 {
@@ -64,7 +74,7 @@ Player.prototype =
 	{
 		if(keys[83] && !key_blocked)
 		{
-			//server.emit('move',{direction:'down',date:+new Date()});
+			//server.emit('move',{pos:this.pos,direction:'down',date:+new Date()});
 			this.move('down');
 			key_blocked = !key_blocked;
 			setTimeout(function(){key_blocked = false;},key_cooldown);
@@ -152,9 +162,36 @@ Player.prototype =
 				break;
 		}
 		//camera.center(this.vPos,this.cell.edge);
+	},
+	createPacket: function()
+	{
+		var packet = {};
+		packet.playerId = this.playerId;
+		packet.pos = this.pos;
+		packet.color = this.color;
+		packet.life = this.life;
+		return packet;
 	}
 }
 gameObjects[camera._id] = camera;
 gameObjects[map._id] = map; //Add map to engine
-var player = new Player(0,0);
-gameObjects[player._id] = player; //Add player to engine
+ //Add player to engine
+
+
+/*SOCKET IO CONNECTION*/
+var dir = 'http://localhost:4242';
+var server = io.connect(dir);
+
+server.on('connect',function (){
+	console.log('connected');
+	server.emit('getPlayer');
+});
+var player;
+server.on('setPlayer',function(data){
+	console.log('new player incomming');
+	if(data === undefined) return;
+	player = new Player(data.pos.x,data.pos.y);
+	player.playerId = data.id;
+	player.color = data.color;
+	gameObjects[player._id] = player;
+});

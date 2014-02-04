@@ -65,6 +65,7 @@ Pos.prototype.clone = function ()
   return new Pos(this.x,this.y);
 }
 
+
 //Game entities
 var gameObjects = {};
 //Keyboard control
