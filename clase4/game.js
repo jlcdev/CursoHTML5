@@ -55,10 +55,8 @@ function Player(x,y)
 	this.cell = map.getCellAt(this.pos);
 	this.cell.playerId = this.playerId;
 	this.color = 'blue';
-	this.vision = 250;
-	
-	console.log(camera.center);
-	//camera.center(this.vPos,this.cell.edge);
+	this.vision = 10;
+	this.life = 75;
 }
 Player.prototype =
 {
@@ -102,6 +100,10 @@ Player.prototype =
 		ctx.translate(-camera.pos.x,-camera.pos.y);
 		ctx.fillStyle = this.color;
 		ctx.fillRect(this.vPos.x,this.vPos.y,this.cell.edge,this.cell.edge);
+		ctx.fillStyle = 'white';
+		ctx.fillRect(this.vPos.x,this.vPos.y-10,this.cell.edge,8);
+		ctx.fillStyle = 'red';
+		ctx.fillRect(this.vPos.x+1,this.vPos.y-9,((this.cell.edge-2)*this.life)/100,6);
 		ctx.restore();
 	},
 	move: function (direction)

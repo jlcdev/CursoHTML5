@@ -25,9 +25,10 @@ Map.prototype.render = function(ctx)
 		{
 			var cell = this.getCellAt(new Pos(i,j));
 			var dist = distanceBetwenPoints(player.pos,new Pos(i,j));
-			dist = 1-dist/10;
-			if(dist < 0) dist = 0;
-			ctx.globalAlpha = dist;
+			if(dist > 8) ctx.globalAlpha = 0;
+			else if(dist > 7 && dist <= 8) ctx.globalAlpha = 0.3;
+			else if(dist > 4 && dist <= 7) ctx.globalAlpha = 0.5;
+			else ctx.globalAlpha = 1-dist/10;
 			ctx.drawImage(cell.buffer,i*cell.edge,j*cell.edge);
 		}
 	}
