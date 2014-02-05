@@ -1,0 +1,22 @@
+*
+{
+	margin: 0px;
+	padding: 0px;
+}
+div .message
+{
+	background-color: blue;
+}
+div .board
+{
+	height: 400px;
+	background-color: yellow;
+}
+div .input
+{
+	background-color: red;
+}
+.textArea
+{
+	background-color: green;
+}

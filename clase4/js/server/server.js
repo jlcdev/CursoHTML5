@@ -16,17 +16,16 @@ var map = new Map();
 io.sockets.on('connection',function (client)
 {
 	++map.playerCount;//count new player
-	for(var cell in map.cells)//send players in server
+	for(var key in map.cells)//send players in server
 	{
-		if(cell.player !== undefined)
+		if(map.cells[key].player !== undefined)
 		{
-			client.emit('addPlayer',cell.player);
+			client.emit('addPlayer',map.cells[key].player);
 		}
 	}
 
 	client.on('newPlayer',function()
 	{
-		console.log('new Player launched');
 		var player = map.newPlayer(client.id);
 		client.emit('setPlayer',player);
 		client.broadcast.emit('addPlayer',player);
@@ -34,7 +33,6 @@ io.sockets.on('connection',function (client)
 
 	client.on('move',function (data)
 	{
-		console.log('Client move');
 		if(data === undefined) return;
 		if(data.direction === undefined) return;
 		//var newTime = +new Date();
@@ -47,6 +45,7 @@ io.sockets.on('connection',function (client)
 				if(upCell.player === undefined)
 				{
 					upCell.player = new Player(cell.player.pos.x,cell.player.pos.y-1,cell.player.id,cell.player.color);
+					upCell.player.life = cell.player.life;
 					io.sockets.emit('playerUpdate',upCell.player);
 					map.deleteCell(new Pos(cell.player.pos.x,cell.player.pos.y));
 				}
@@ -56,6 +55,7 @@ io.sockets.on('connection',function (client)
 				if(leftCell.player === undefined)
 				{
 					leftCell.player = new Player(cell.player.pos.x-1,cell.player.pos.y,cell.player.id,cell.player.color);
+					leftCell.player.life = cell.player.life;
 					io.sockets.emit('playerUpdate',leftCell.player);
 					map.deleteCell(new Pos(cell.player.pos.x,cell.player.pos.y));
 				}
@@ -65,6 +65,7 @@ io.sockets.on('connection',function (client)
 				if(rightCell.player === undefined)
 				{
 					rightCell.player = new Player(cell.player.pos.x+1,cell.player.pos.y,cell.player.id,cell.player.color);
+					rightCell.player.life = cell.player.life;
 					io.sockets.emit('playerUpdate',rightCell.player);
 					map.deleteCell(new Pos(cell.player.pos.x,cell.player.pos.y));
 				}
@@ -74,12 +75,44 @@ io.sockets.on('connection',function (client)
 				if(downCell.player === undefined)
 				{
 					downCell.player = new Player(cell.player.pos.x,cell.player.pos.y+1,cell.player.id,cell.player.color);
+					downCell.player.life = cell.player.life;
 					io.sockets.emit('playerUpdate',downCell.player);
 					map.deleteCell(new Pos(cell.player.pos.x,cell.player.pos.y));
 				}
 				break;
 		}
 	});
+
+	client.on('attack',function (){
+		var cell = map.getCellPlayer(client.id);
+		if(cell === undefined) return;
+		var aroundPositions = map.getAroundPositions(cell.player.pos);
+		//console.log(aroundPositions);
+		var size = Object.keys(aroundPositions).length;
+		for(var i = 0; i < size; ++i)
+		{
+			if(aroundPositions[i] in map.cells)
+			{
+				var enemy = map.cells[aroundPositions[i]];
+				enemy.player.life -= 10;
+				if(enemy.player.life < 0) enemy.player.life = 0;
+				io.sockets.emit('playerUpdate',enemy.player);
+			}
+		}
+		/*
+		for(var position in aroundPositions)
+		{
+			if(position in map.cells)
+			{
+				console.log('enemy detected');
+				var enemy = map.cells[position];
+				enemy.player.life -= 10;
+				io.sockets.emit('playerUpdate',enemy.player);
+			}
+		}
+		*/	
+	});
+
 
 	client.on('disconnect',function ()
 	{

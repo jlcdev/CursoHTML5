@@ -6,7 +6,7 @@ function Map()
 {
 	this.playerCount = 0;
 	this.cells = {};
-	this.respawnArea = 50;
+	this.respawnArea = 10;
 }
 Map.prototype =
 {
@@ -54,6 +54,21 @@ Map.prototype =
 	{
 		if(pos === undefined) return;
 		delete this.cells[pos.getIndex()];
+	},
+	getAroundPositions: function (pos)
+	{
+		var x = pos.x;
+		var y = pos.y;
+		var index = {};
+		index[0] = (x-1)+'x'+(y-1);
+		index[1] = x+'x'+(y-1);
+		index[2] = (x+1)+'x'+(y-1);
+		index[3] = (x-1)+'x'+y;
+		index[4] = (x+1)+'x'+y;
+		index[5] = (x-1)+'x'+(y+1);
+		index[6] = x+'x'+(y+1);
+		index[7] = (x+1)+'x'+(y+1);
+		return index;
 	}
 }
 module.exports = Map;

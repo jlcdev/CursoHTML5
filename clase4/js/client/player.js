@@ -15,41 +15,48 @@ Player.prototype =
 		this.vPos.x += (this.pos.x*50-this.vPos.x)/5;
 		this.vPos.y += (this.pos.y*50-this.vPos.y)/5;
 		if(!this.control) return;
-		if(keys[83] && !key_blocked)
+		if(keys[83] && !key_move_blocked)
 		{
-			key_blocked = !key_blocked;
+			key_move_blocked = !key_move_blocked;
 			server.emit('move',{direction:'down',date:+new Date()});
 			setTimeout(function()
 			{
-				key_blocked = false;
+				key_move_blocked = false;
 			},key_cooldown);
 		}
-		if(keys[68] && !key_blocked)
+		if(keys[68] && !key_move_blocked)
 		{
-			key_blocked = !key_blocked;
+			key_move_blocked = !key_move_blocked;
 			server.emit('move',{direction:'right',date:+new Date()});
 			setTimeout(function()
 			{
-				key_blocked = false;
+				key_move_blocked = false;
 			},key_cooldown);
 		}
-		if(keys[65] && !key_blocked)
+		if(keys[65] && !key_move_blocked)
 		{
-			key_blocked = !key_blocked;
+			key_move_blocked = !key_move_blocked;
 			server.emit('move',{direction:'left',date:+new Date()});
 			setTimeout(function()
 			{
-				key_blocked = false;
+				key_move_blocked = false;
 			},key_cooldown);
 		}
-		if(keys[87] && !key_blocked)
+		if(keys[87] && !key_move_blocked)
 		{
-			key_blocked = !key_blocked;
+			key_move_blocked = !key_move_blocked;
 			server.emit('move',{direction:'up',date:+new Date()});
 			setTimeout(function()
 			{
-				key_blocked = false;
+				key_move_blocked = false;
 			},key_cooldown);
+		}
+		if(keys[32] && !key_attack_blocked)
+		{
+			console.log('Send attack in area.');
+			key_attack_blocked = !key_attack_blocked;
+			server.emit('attack');
+			setTimeout(function(){key_attack_blocked = false;},key_cooldown);
 		}
 	},
 	update: function (sPlayer)
@@ -73,7 +80,7 @@ Player.prototype =
 	render: function (ctx)
 	{
 		ctx.save();
-		camera.center(this.pos);
+		if (this.id == server.id) camera.center(this.pos);
 		ctx.translate(-camera.pos.x,-camera.pos.y);
 		ctx.fillStyle = this.color;
 		ctx.fillRect(this.vPos.x,this.vPos.y,50,50);

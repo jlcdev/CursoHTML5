@@ -2,7 +2,8 @@
 
 
 var map = new Map();
-var key_blocked = false;
+var key_move_blocked = false;
+var key_attack_blocked = false;
 var key_cooldown = 500;
 /*ADD SOUND USING HOWLER*//*
 var sound = new Howl({
@@ -125,6 +126,7 @@ server.on('connect',function ()
 {
 	console.log('connected');
 	server.emit('newPlayer');
+	server.id = server.socket.sessionid;
 });
 
 server.on('setPlayer',function (player)
