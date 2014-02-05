@@ -12,6 +12,7 @@ Map.prototype =
 {
 	getCellAt: function (pos)
 	{
+		if(pos === undefined) return;
 		var index;
 		if(typeof(pos) === 'string') index = pos;
 		else index = pos.getIndex();
@@ -25,8 +26,9 @@ Map.prototype =
 	},
 	newPlayer: function (id)
 	{
-		var x = Math.floor(Math.random()*this.respawnArea);
-		var y = Math.floor(Math.random()*this.respawnArea);
+		if(id === undefined) return;
+		var x = Math.round(Math.random()*this.respawnArea);
+		var y = Math.round(Math.random()*this.respawnArea);
 		var cell = getCellAt(new Pos(x,y))
 		if(cell.player !== undefined) return this.newPlayer();
 		else
@@ -36,17 +38,22 @@ Map.prototype =
 			return cell.player;
 		}
 	},
-	getCellPlayer: function ()
+	getCellPlayer: function (id)
 	{
-		
+		if(id === undefined) return;
+		for(var key in this.cells)
+		{
+			var cell = this.cells[key];
+			if(cell.player)
+			{
+				if(cell.player.id === id) return cell;
+			}
+		}
+	},
+	deleteCell: function(oldCell)
+	{
+		if(oldCell === undefined) return;
+		delete this.cells[oldCell.pos.getIndex()];
 	}
-
-}
-
-
-Map.prototype.allocatePlayer
-Map.prototype.update = function()
-{
-	console.log('update');
 }
 module.exports = Map;

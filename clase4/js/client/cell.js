@@ -21,5 +21,12 @@ Cell.prototype =
 		ctxTemp.fillStyle = this.color;
 		ctxTemp.fillRect(0,0,this.edge,this.edge);
 		this.buffer = temp;
+	},
+	update: function(newCell)
+	{
+		if(newCell === undefined) return;
+		if(newCell.playerId) this.playerId = newCell.playerId;
+		if(newCell.edge) this.edge = newCell.edge;
+		if(newCell.player) this.player = newCell.player;
 	}
 }
