@@ -3,16 +3,20 @@ function Pos(x,y)
   this.x = x;
   this.y = y;
 }
-Pos.prototype.getIndex = function ()
+Pos.prototype =
 {
-  return this.x+'x'+this.y;
+	getIndex: function ()
+	{
+		return this.x+'x'+this.y;
+	},
+	toString: function ()
+	{
+		return this.getIndex();
+	},
+	clone: function ()
+	{
+		return new Pos(this.x,this.y);
+	}
 }
-Pos.prototype.toString = function ()
-{
-  return this.getIndex();
-}
-Pos.prototype.clone = function ()
-{
-  return new Pos(this.x,this.y);
-}
+
 module.exports = Pos;

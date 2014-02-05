@@ -1,6 +1,6 @@
-var Pos = require('./sPos');
-var Cell = require('./sCell');
-var Player = require('./sPlayer');
+var Pos = require('./sPos.js');
+var Cell = require('./sCell.js');
+var Player = require('./sPlayer.js');
 //Map class
 function Map()
 {
@@ -29,11 +29,11 @@ Map.prototype =
 		if(id === undefined) return;
 		var x = Math.round(Math.random()*this.respawnArea);
 		var y = Math.round(Math.random()*this.respawnArea);
-		var cell = getCellAt(new Pos(x,y))
+		var cell = this.getCellAt(new Pos(x,y))
 		if(cell.player !== undefined) return this.newPlayer();
 		else
 		{
-			++playerCount;
+			++this.playerCount;
 			cell.player = new Player(x,y,id,'#'+Math.floor(Math.random()*16777215).toString(16));
 			return cell.player;
 		}
@@ -50,10 +50,10 @@ Map.prototype =
 			}
 		}
 	},
-	deleteCell: function(oldCell)
+	deleteCell: function(pos)
 	{
-		if(oldCell === undefined) return;
-		delete this.cells[oldCell.pos.getIndex()];
+		if(pos === undefined) return;
+		delete this.cells[pos.getIndex()];
 	}
 }
 module.exports = Map;

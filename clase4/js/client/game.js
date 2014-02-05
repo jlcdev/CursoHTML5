@@ -2,8 +2,8 @@
 
 
 var map = new Map();
-
-
+var key_blocked = false;
+var key_cooldown = 500;
 /*ADD SOUND USING HOWLER*//*
 var sound = new Howl({
 	urls: ['http://s1download-universal-soundbank.com/mp3/sounds/829.mp3'],
@@ -66,51 +66,56 @@ gameObjects[map._id] = map; //Add map to engine
 
 function Manager()
 {
+	this._id = objPrototype()._id;
 	this.my_player_id;
-	this.players = {};
+	this.players = {};
 }
 Manager.prototype =
 {
 	setPlayerId: function (id)
 	{
+		console.log('manager setPlayerId');
 		if(id === undefined) return;
 		this.my_player_id = id;
 	},
 	add: function (player)
 	{
 		if(player === undefined) return;
-		var tmp = new Player();
-		tmp.update(player);
+		var tmp = new Player(player.pos.x,player.pos.y,player.id,player.color);
 		tmp.control = (player.id !== this.my_player_id)?false:true;
+		this.players[tmp.id] = tmp;
 	},
 	update: function (player)
 	{
-		if(player === undefined) return;
 		var tmp = this.players[player.id];
 		if(tmp === undefined) return;
 		tmp.update(player);
 	},
 	logic: function (dt)
 	{
-		for(var player in this.players)
+		for(var key in this.players)
 		{
-			player.logic(dt);
+			//console.log(player);
+			this.players[key].logic(dt);
 		}
 	},
 	render: function (ctx)
 	{
-		for(var player in this.players)
+		for(var key in this.players)
 		{
-			player.render(ctx);
+			this.players[key].render(ctx);
 		}
 	},
 	deletePlayer: function (id)
 	{
+		console.log('manager deletePlayer');
 		delete this.players[id];
 	}
 }
 
 var manager = new Manager();
+
+
 
 /*SOCKET IO CONNECTION*/
 var dir = 'http://localhost:4242';
@@ -124,7 +129,6 @@ server.on('connect',function ()
 
 server.on('setPlayer',function (player)
 {
-	console.log('setPlayer launched with new player data');
 	if(player === undefined) return;
 	manager.my_player_id = player.id;
 	manager.add(player);
@@ -140,7 +144,6 @@ server.on('addPlayer',function (player)
 server.on('playerUpdate',function (player)
 {
 	if(player === undefined) return;
-	console.log('playerUpdate launched');
 	manager.update(player);
 });
 
@@ -151,7 +154,7 @@ server.on('exit',function (id)
 	manager.deletePlayer(id);
 });
 
-
+gameObjects[manager._id] = manager;
 
 
 

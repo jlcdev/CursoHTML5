@@ -5,10 +5,11 @@ var Map = require('./sMap');
 var Player = require('./sPlayer');
 
 //Configure server
+
 var port = 4242;
 var logLevel = 1;
 var io = require('socket.io').listen(port);
-
+io.set('log level',logLevel);
 //Create map
 var map = new Map();
 
@@ -42,47 +43,39 @@ io.sockets.on('connection',function (client)
 		switch(data.direction)
 		{
 			case 'up':
-				var upCell = map.getCellAt(new Pos(cell.pos.x,cell.pos.y-1));
+				var upCell = map.getCellAt(new Pos(cell.player.pos.x,cell.player.pos.y-1));
 				if(upCell.player === undefined)
 				{
-					var player = cell.player;
-					player.pos = upCell.pos;
-					upCell.player = player;
-					map.deleteCell(cell);
-					io.sockets.emit('playerUpdate',player);
+					upCell.player = new Player(cell.player.pos.x,cell.player.pos.y-1,cell.player.id,cell.player.color);
+					io.sockets.emit('playerUpdate',upCell.player);
+					map.deleteCell(new Pos(cell.player.pos.x,cell.player.pos.y));
 				}
 				break;
 			case 'left':
-				var leftCell = map.getCellAt(new Pos(cell.pos.x-1,cell.pos.y));
+				var leftCell = map.getCellAt(new Pos(cell.player.pos.x-1,cell.player.pos.y));
 				if(leftCell.player === undefined)
 				{
-					var player = cell.player;
-					player.pos = leftCell.pos;
-					leftCell.player = player;
-					map.deleteCell(cell);
-					io.sockets.emit('playerUpdate',player);
+					leftCell.player = new Player(cell.player.pos.x-1,cell.player.pos.y,cell.player.id,cell.player.color);
+					io.sockets.emit('playerUpdate',leftCell.player);
+					map.deleteCell(new Pos(cell.player.pos.x,cell.player.pos.y));
 				}
 				break;
 			case 'right':
-				var rightCell = map.getCellAt(new Pos(cell.pos.x+1,cell.pos.y));
+				var rightCell = map.getCellAt(new Pos(cell.player.pos.x+1,cell.player.pos.y));
 				if(rightCell.player === undefined)
 				{
-					var player = cell.player;
-					player.pos = rightCell.pos;
-					rightCell.player = player;
-					map.deleteCell(cell);
-					io.sockets.emit('playerUpdate',player);
+					rightCell.player = new Player(cell.player.pos.x+1,cell.player.pos.y,cell.player.id,cell.player.color);
+					io.sockets.emit('playerUpdate',rightCell.player);
+					map.deleteCell(new Pos(cell.player.pos.x,cell.player.pos.y));
 				}
 				break;
 			case 'down':
-				var downCell = map.getCellAt(new Pos(cell.pos.x,cell.pos.y+1));
+				var downCell = map.getCellAt(new Pos(cell.player.pos.x,cell.player.pos.y+1));
 				if(downCell.player === undefined)
 				{
-					var player = cell.player;
-					player.pos = downCell.pos;
-					downCell.player = player;
-					map.deleteCell(cell);
-					io.sockets.emit('playerUpdate',player);
+					downCell.player = new Player(cell.player.pos.x,cell.player.pos.y+1,cell.player.id,cell.player.color);
+					io.sockets.emit('playerUpdate',downCell.player);
+					map.deleteCell(new Pos(cell.player.pos.x,cell.player.pos.y));
 				}
 				break;
 		}

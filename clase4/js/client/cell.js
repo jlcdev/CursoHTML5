@@ -1,6 +1,5 @@
 function Cell()
 {
-	this.playerId = undefined;
 	this.edge = 50;
 	this.newColor();//generate color
 	this.newBuffer();//Precalculate canvas draw
