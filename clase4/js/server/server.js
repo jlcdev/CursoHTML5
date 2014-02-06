@@ -13,7 +13,7 @@ io.set('log level',logLevel);
 //Create map
 var map = new Map();
 
-var light_time = 10000;
+var light_time = 5000;
 var light = 0;
 var positive = false;
 var timmer;
