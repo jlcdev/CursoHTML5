@@ -13,9 +13,27 @@ io.set('log level',logLevel);
 //Create map
 var map = new Map();
 
+var light_time = 10000;
+var light = 0;
+var positive = false;
+var timmer;
+function lightEvent()
+{
+	clearInterval(timmer);
+	if(light <= 0 || light >= 1) positive = !positive;
+	if(positive) light += 0.1;
+	else light -= 0.1;
+	light = Math.round(light*10)/10;
+	io.sockets.emit('worldLight',light);
+	timmer = setTimeout(lightEvent,light_time);
+}
+
+timmer = setTimeout(lightEvent,light_time);
+
 io.sockets.on('connection',function (client)
 {
 	++map.playerCount;//count new player
+	if(map.playerCount > 0)
 	for(var key in map.cells)//send players in server
 	{
 		if(map.cells[key].player !== undefined)

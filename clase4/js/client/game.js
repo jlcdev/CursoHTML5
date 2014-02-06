@@ -1,6 +1,4 @@
 
-
-
 var map = new Map();
 var key_move_blocked = false;
 var key_attack_blocked = false;
@@ -117,6 +115,66 @@ Manager.prototype =
 var manager = new Manager();
 
 
+function LightWorld()
+{
+	this._id = objPrototype()._id;
+	this.intensity = 0;
+}
+LightWorld.prototype =
+{
+	setIntensity: function (data)
+	{
+		if(data === undefined) return;
+		this.intensity = data;
+	},
+	render: function (ctx)
+	{
+		ctx.save();
+		ctx.globalAlpha = this.intensity;
+		ctx.fillRect(0,0,canvas.width,canvas.height);
+		ctx.restore();
+	}
+}
+
+var ambientLight = new LightWorld();
+
+function ImageOBJ(x,y,src)
+{
+	this._id = objPrototype()._id;
+	this.img = new Image();
+	this.img.src = src;
+	this.x = x;
+	this.y = y;
+	this.width = this.img.width;
+	this.height = this.img.height;
+	//this.load();
+}
+ImageOBJ.prototype =
+{
+	getImage: function ()
+	{
+		return this.img;
+	},/*
+	load: function()
+	{
+		var tmpCanvas = document.createElement('canvas');
+		tmpCanvas.width = this.width;
+		tmpCanvas.height = this.height;
+		var tmpCtx = tmpCanvas.getContext('2d');
+		tmpCtx.drawImage(this.img,0,0);
+		this.context = tmpCanvas;
+	},*/
+	render: function (ctx)
+	{
+		if(!this.img.complete) return;
+		ctx.save();
+		ctx.drawImage(this.img,this.x,this.y);
+		ctx.restore();
+	}
+}
+
+var HUD = new ImageOBJ(15,15,'./img/hudtesting.png');
+
 
 /*SOCKET IO CONNECTION*/
 var dir = 'http://localhost:4242';
@@ -156,7 +214,20 @@ server.on('exit',function (id)
 	manager.deletePlayer(id);
 });
 
+server.on('worldLight',function (light){
+	ambientLight.setIntensity(light);
+});
+
 gameObjects[manager._id] = manager;
+gameObjects[ambientLight._id] = ambientLight;
+gameObjects[HUD._id] = HUD;
+
+/*
+long map(long x, long in_min, long in_max, long out_min, long out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+*/
 
 
 

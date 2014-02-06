@@ -12,7 +12,7 @@ buffer.width = canvas.width;
 buffer.height = canvas.height;
 var ctxBuffer = buffer.getContext('2d');
 
-// shim layer with setTimeout fallback
+//Find requestAnimationFrame 
 window.requestAnimationFrame = (function()
 {
   return window.requestAnimationFrame ||
