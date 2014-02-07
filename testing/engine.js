@@ -58,10 +58,6 @@ Util.prototype =
   {
     return Math.floor(Math.random()*(max-min+ 1))+min;
   },
-  date: function()
-  {
-    return +new Date();
-  },
   generateRandomId: function()
   {
     var date = this.date();
@@ -70,6 +66,27 @@ Util.prototype =
   generateRandomColor: function()
   {
     return '#'+Math.floor(Math.random()*16777215).toString(16);
+  },
+  generateRandomWithMax: function(max)
+  {
+    return Math.random()*max;
+  },
+  generateRandom01: function()
+  {
+    return Math.floor(Math.random()*9)%2;
+  },
+  generateRandom1orMin1: function()
+  {
+    if(this.generateRandom01() === 0) return 1;
+    else return -1;
+  },
+  date: function()
+  {
+    return +new Date();
+  },
+  toRadian: function(degree)
+  {
+    return (degree*Math.PI)/180;
   },
   getKeyCodeValue: function(key,shiftKey)
   {
@@ -116,10 +133,9 @@ GameObject.prototype =
     if(gameManager.findGameObjectById(id) === undefined) this._id = id;
     else this.genId();
   },
-  logic: function (dt)
-  {},
-  render: function (ctx)
-  {}
+  logic: function(dt){},
+  render: function(ctx){},
+  resize: function(){}
 };
 
 //GameManager class
@@ -127,6 +143,7 @@ function GameManager()
 {
   this.countGameObjects = 0;
   this.gameObjects = {};
+  this.active = true;
 }
 GameManager.prototype =
 {
@@ -181,6 +198,12 @@ GameManager.prototype =
       if(this.gameObjects[key].render)
         this.gameObjects[key].render(ctx);
   },
+  resize: function()
+  {
+    for(var key in this.gameObjects)
+      if(this.gameObjects[key].resize)
+        this.gameObjects[key].resize();
+    },
   gameInit: function()
   {
     requestAnimationFrame(mainloop);//Engine init
@@ -251,12 +274,15 @@ var newDate,dt;
 function mainloop()
 {
   requestAnimationFrame(mainloop);
+  if(gameManager.active)
+  {
   newDate = util.date();
   deltaTime = (newDate-oldDate)/1000;
   oldDate = newDate;
   logic(deltaTime); //send deltaTime to all objects
   render(ctxBuffer); //draw all in buffer
   frontUpdate(); //draws all content in buffer to front canvas
+  }
 }
 
 //if change screen size resize front & buffer canvas
@@ -264,10 +290,11 @@ function resizeControl()
 {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  buffer.width = window.innerWidth;
-  buffer.height = window.innerHeight;
+  buffer.width = canvas.width;
+  buffer.height = canvas.height;
   midWidth = canvas.width/2;
   midHeight = canvas.height/2;
-  gameManager.render(ctxBuffer);
+  render(ctxBuffer); 
   frontUpdate();
+  gameManager.resize();
 }
