@@ -1,3 +1,19 @@
+var score = 0;
+var objScore = new GameObject();
+objScore.coord = new CoordXY(20,20);
+objScore.baseText = 'Score: ';
+objScore.logic = function(dt)
+{
+	this.msg = this.baseText+score;
+};
+objScore.render = function(ctx)
+{
+	ctx.lineWidth = 3;
+	ctx.strokeStyle = "white";
+ 	ctx.font = "bold 16px Arial";
+  	ctx.strokeText(this.msg,this.coord.x,this.coord.y);
+};
+
 
 var key_attack_lock = false;
 key_attack_lock_cooldown = 100;
@@ -5,18 +21,14 @@ key_attack_lock_cooldown = 100;
 
 var keyA = util.getKeyCode('a');
 var keyD = util.getKeyCode('d');
-/*
 var keyW = util.getKeyCode('w');
 var keyS = util.getKeyCode('s');
-*/
 var keyP = util.getKeyCode('p');
 var keySpace = util.getKeyCode(' ');
 
 var background = new GameObject();
 
 var offsetY = 0;
-
-//ctxBuffer.globalAlpha = 0.5;
 
 background.render = function (ctx)
 {
@@ -31,8 +43,8 @@ var player = new GameObject();
 player.coord = new CoordXY(midWidth,canvas.height-100);
 player.imgs = ['player.png','playerLeft.png','playerRight.png'];
 player.hspeed = 30;
-//player.vspeed = 5;
-player.life = 3;
+player.vspeed = 30;
+player.life = 4;
 player.shield = false;
 player.currentSprite = 0;
 player.radius = 40;
@@ -59,25 +71,28 @@ player.logic = function (dt)
 			{
 				activateShield();
 				--this.life;
-				if(this.life < 0) this.life = 0;
+				if(this.life <= 0)
+				{
+					gameManager.active = false;
+				}
 				delete collision[c];
 				gameManager.deleteGameObject(c);
 				break;
 			}
 		}
 	}
-	/*
+	
 	if(keys[keyW])//UP direction
 	{
-		this.coord.y -= this.vspeed;
+		this.coord.y -= this.vspeed*dt;
 		if(this.coord.y < 0) this.coord.y = 0;
 	}
 	if(keys[keyS])//DOWN direction
 	{
-		this.coord.y += this.vspeed;
+		this.coord.y += this.vspeed*dt;
 		if(this.coord.y > canvas.height-100) this.coord.y = canvas.height-100;
 	}
-	*/
+	
 	if(keys[keyA])//LEFT direction
 	{
 		this.currentSprite = 1;
@@ -100,7 +115,6 @@ player.logic = function (dt)
 		if(this.currentSprite === 0) bullet.coord = new CoordXY(this.coord.x+40,this.coord.y-55);
 		else if(this.currentSprite === 1) bullet.coord = new CoordXY(this.coord.x+30,this.coord.y-55);
 		else bullet.coord = new CoordXY(this.coord.x+30,this.coord.y-55);
-		//bullet.coord = new CoordXY(this.coord.x+90,this.coord.y-5);
 		bullet.logic = function (dt)
 		{
 			for(var c in collision) //Check colisions
@@ -110,6 +124,7 @@ player.logic = function (dt)
 				if(dist < this.radius+collision[c].radius)
 				{
 					//Explosion
+					score += 50;
 					this.explosion = true;
 					delete collision[c];
 					gameManager.deleteGameObject(c);
@@ -140,6 +155,7 @@ player.logic = function (dt)
 				if(dist < this.radius+collision[c].radius)
 				{
 					//Explosion
+					score += 50;
 					this.explosion = true;
 					delete collision[c];
 					gameManager.deleteGameObject(c);
@@ -194,6 +210,7 @@ player.render = function (ctx)
 	ctx.stroke();
 	ctx.restore();
 	*/
+	if(!gameManager.active) alert('Fin de la partida! Score: '+score);
 };
 
 var meteorInt;
@@ -210,7 +227,6 @@ function launchMeteor()
 	meteor.dirX = util.generateRandom1orMin1();
 	meteor.type = util.generateRandom01();
 	meteor.radius = (meteor.type === 0)?20:80;
-	//console.log(meteor.radius);
 	meteor.logic = function (dt)
 	{
 		this.coord.y += this.vspeed;
@@ -230,20 +246,6 @@ function launchMeteor()
 		if(this.type === 0) Eximo.drawSprite('meteorSmall.png',ctx,this.coord.x-25,this.coord.y-25);
 		else Eximo.drawSprite('meteorBig.png',ctx,this.coord.x-70,this.coord.y-50);
 		ctx.restore();
-		/*
-		ctx.save();
-		ctx.globalAlpha = 0.2;
-		ctx.beginPath();
-		
-		if(this.type === 0) ctx.arc(this.coord.x, this.coord.y,this.radius,0,2*Math.PI,false);
-		else ctx.arc(this.coord.x, this.coord.y,this.radius,0,2*Math.PI,false);
-		ctx.fillStyle = 'green';
-		ctx.fill();
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = '#003300';
-		ctx.stroke();
-		ctx.restore();
-		*/
 	};
 	collision[meteor._id] = meteor;
 	gameManager.addGameObject(meteor);
@@ -251,49 +253,98 @@ function launchMeteor()
 	meteorInt = setTimeout(launchMeteor,util.generateRandomWithMax(1000)); //Prepare new meteor
 }
 
-var enemyInt;
-var keys_block = {};
+function generateShoot(x,y,direction,type)
+{
+	var bullet = new GameObject();
+	bullet.coord = new CoordXY(x,y);
+	bullet.vspeed = 2000;
+	bullet.hspeed = 100;
+	bullet.type = type;
+	bullet.radius = 3;
+	bullet.direction = direction;
+	bullet.logic = function(dt)
+	{
+		if(direction)
+		{
+			this.coord.y -= this.vspeed*dt;
+			if(this.coord.y < 0) gameManager.deleteGameObject(this._id);
+		}
+		else
+		{
+			this.coord.y += this.vspeed*dt;
+			if(this.coord.y > canvas.height+10) gameManager.deleteGameObject(this._id);
+		}
+		for(var c in collision) //Check colisions
+		{
+			var coordOBJ = collision[c].coord;
+			var dist = util.distance(new CoordXY(this.coord.x+25,this.coord.y),new CoordXY(coordOBJ.x,coordOBJ.y));
+			if(dist < this.radius+collision[c].radius)
+			{
+				//Explosion
+				this.explosion = true;
+				delete collision[c];
+				gameManager.deleteGameObject(c);
+				break;
+			}
+		}
+	};
+	bullet.render = function(ctx)
+	{
+		if(type === 0) //red
+		{
+			if(this.explosion)
+			{
+				Eximo.drawSprite('laserRedShot.png',ctxBuffer,this.coord.x,this.coord.y);
+			}
+			else
+			{
+				Eximo.drawSprite('laserRed.png',ctx,this.coord.x,this.coord.y);
+			}
+		}
+		else //Green
+		{
+			if(this.explosion)
+			{
+				Eximo.drawSprite('laserGreenShot.png',ctxBuffer,this.coord.x,this.coord.y);
+			}
+			else
+			{
+				Eximo.drawSprite('laserGreen.png',ctx,this.coord.x,this.coord.y);
+			}
+		}
+	};
+	gameManager.addGameObject(bullet);
+}
 
+var enemyInt;
 function launchEnemy()
 {
 	clearInterval(enemyInt);
 	var enemy = new GameObject();
-	enemy.coord = new CoordXY(util.randomRange(0,canvas.width),util.randomRange(-200,0));
-	enemy.vspeed = util.randomRange(3,8);
-	enemy.hspeed = util.randomRange(5,30);
-	enemy.radius = 60;
-	enemy.canShoot = true;
-	enemy.cooldown = util.randomRange(50,100);
-	enemy.logic = function(dt)
-	{
-		if(!this.canShoot && util.generateRandom01() === 0)
+		enemy.coord = new CoordXY(util.randomRange(0,canvas.width),util.randomRange(-200,0));
+		enemy.vspeed = util.randomRange(60,300);
+		enemy.radius = 70;
+		enemy.cooldown = util.randomRange(0.5,2);
+		enemy.cooldown_count = 0;
+		enemy.logic = function(dt)
 		{
-			keys_block[enemy._id] = enemy;
-			this.canShoot = false;
-			this.cooldown = true;
-			var bullet = new GameObject();
-			bullet.vspeed = 2000;
-			bullet.radius = 3;
-			bullet.logic = function(dt)
+			this.cooldown_count += dt;
+			if(this.cooldown_count >= this.cooldown)
 			{
-				this.coord.y += this.vspeed*dt;
-				if(bullet2.coord.y < -20) gameManager.deleteGameObject(bullet2._id);
-			};
-			bullet.render = function(ctx)
-			{
-				Eximo.drawSprite('laserRed.png',ctx,this.coord.x,this.coord.y);
-			};
-			setTimeout(function(){keys_block[enemy._id].canShoot = false;},keys_block[enemy._id].cooldown);
-		}
-	};
-	enemy.render = function(ctx)
-	{
-		Eximo.drawSprite('enemyShip.png',ctx,this.coord.x,this.coord.y);
-	};
-
-	enemyInt = setTimeout(launchEnemy,util.generateRandomWithMax(10000)); //Prepare new Enemy
+				generateShoot(this.coord.x+20,this.coord.y+60,false,0);
+				generateShoot(this.coord.x+65,this.coord.y+60,false,0);
+				this.cooldown_count = 0; //reset cooldown count
+			}
+			this.coord.y += this.vspeed*dt;
+		};
+		enemy.render = function(ctx)
+		{
+			Eximo.drawSprite('enemyShip.png',ctx,this.coord.x,this.coord.y);
+		};
+		collision[enemy._id] = enemy;
+		gameManager.addGameObject(enemy);
+	enemyInt = setTimeout(launchEnemy,util.generateRandomWithMax(5000)); //Prepare new Enemy
 }
-
 
 
 function setInitialConfigs()
@@ -322,6 +373,7 @@ function setInitialConfigs()
 	gameManager.addGameObject(player);
 	meteorInt = setTimeout(launchMeteor,util.generateRandomWithMax(5000));
 	enemyInt = setTimeout(launchEnemy,util.generateRandomWithMax(5000));
+	gameManager.addGameObject(objScore);
 }
 
 /*
